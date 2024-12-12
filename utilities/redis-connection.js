@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { appConfig } from "./app-config.js";
 const { host, port, retry, interval } = appConfig.redis;
-import { createLogger } from "../utils/logger.js";
+import { createLogger } from "../utilities/logger.js";
 const logger = createLogger("Redis");
 
 const redisConfig = {
