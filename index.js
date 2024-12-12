@@ -6,18 +6,16 @@ import { createServer } from "http";
 import { initSocket } from "./socket.js";
 import dotenv from "dotenv";
 dotenv.config();
-const port = process.env.PORT || 4200;
+const port = process.env.PORT || 5000;
 import { createLogger } from "./utilities/logger.js";
 import { checkDatabaseConnection } from "./utilities/db-connection.js";
 import { initializeRedis } from "./utilities/redis-connection.js";
 import { connect } from "./utilities/amqp.js";
-import { loadConfig } from "./utilities/load-config.js";
 import router from "./router/api-routes.js";
 const logger = createLogger("Server");
 
 const startServer = async () => {
   await Promise.all([checkDatabaseConnection(), initializeRedis(), connect()]);
-  await loadConfig();
   var app = express();
   let server = createServer(app);
   var io = new Server(server);
