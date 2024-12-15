@@ -56,14 +56,15 @@ export const updateBalanceFromAccount = async (data, key, playerDetails) => {
 
 export const prepareDataForWebhook = async (betObj, key, socket) => {
   try {
-    let { lobby_id, betAmount, game_id, bet_id, final_amount, user_id, txnId } =
+    console.log(betObj,"betObj");
+    let { betAmount, game_id, bet_id, user_id, txnId,win_amt} =
       betObj;
     let userIP = socket?.handshake?.address || "";
     if (socket && socket.handshake.headers["x-forwarded-for"]) {
       userIP = socket.handshake.headers["x-forwarded-for"].split(",")[0].trim();
     }
     let obj = {
-      amount: Number(betAmount).toFixed(2),
+      amount:100,
       txn_id: generateUUIDv7(),
       ip: userIP,
       game_id,
@@ -71,14 +72,14 @@ export const prepareDataForWebhook = async (betObj, key, socket) => {
     };
     switch (key) {
       case "DEBIT":
-        obj.description = `${obj.amount} debited for Andar Bahar game for Round ${lobby_id}`;
+        obj.description = `${obj.amount} debited for thimbles game for Round `;
         obj.bet_id = bet_id;
         obj.txn_type = 0;
         break;
       case "CREDIT":
-        obj.amount = final_amount;
+        obj.amount = win_amt;
         obj.txn_ref_id = txnId;
-        obj.description = `${final_amount} credited for Andar Bahar game for Round ${lobby_id}`;
+        obj.description = `${win_amt} credited for thimbles game for Round `;
         obj.txn_type = 1;
         break;
       default:

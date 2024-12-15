@@ -25,7 +25,6 @@ export const getUserInfo = async (socket) => {
       bl: Math.floor(Number(userDetails.balance)),
       avIn: userDetails.image,
       crTs: Date.now(),
-      rmId: 0,
     });
   } catch (error) {
     console.log(error);
