@@ -31,7 +31,6 @@ export const addSettleBet = async (settlements) => {
     console.error(err);
   }
 };
-
 export const insertBets = async (betData) => {
   try {
     const { bet_id, user_id,operator_id, bet_amount, bet_on } = betData;

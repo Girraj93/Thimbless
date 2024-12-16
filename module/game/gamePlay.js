@@ -13,12 +13,26 @@ import { insertBets } from "../bet/bet-db.js";
 
   export const startMatch = async(io,socket,event)=>{
     await handleBet(io,socket,event);
-    const randomNumber = randomNumberGenerator(event[3]);
+    const randomNumber = randomNumberGenerator(event[2]);
     await settleBet(socket, randomNumber,event);
   }
+
   const randomNumberGenerator = (balls) => {
-    return Math.floor(Math.random()*balls)+1;
-  };
+    if(balls === 1){
+      return Math.floor(Math.random() * 3)+1;
+    }
+    else{
+    const randomNumbers = [];
+    while(randomNumbers.length < balls){
+    const randomNumber = Math.floor(Math.random() * 3)+1; 
+      if (!randomNumbers.includes(randomNumber)) {
+        randomNumbers.push(randomNumber);
+      }
+    }
+    console.log(randomNumbers,"randomNumbers");
+    return randomNumbers;
+  }
+  }
 
   const settleBet = async (socket, randomNumber,event) => {
     let winAmt = 0;
@@ -66,7 +80,6 @@ import { insertBets } from "../bet/bet-db.js";
         msg:`${user_id}:${betAmt}:${betOn}:${winAmt}`
     })
     }
-
 export const handleBet = async(io,socket,event)=>{
     const user_id = socket.data?.userInfo.user_id;
     let playerDetails = await getCache(`PL:${user_id}`);
@@ -77,7 +90,7 @@ export const handleBet = async(io,socket,event)=>{
       });
     const parsedPlayerDetails = JSON.parse(playerDetails);
     const { userId, operatorId, token, game_id, balance } = parsedPlayerDetails;
-    const win_amt= 0;
+    // const win_amt= 0;
     const bet_id = `BT:${userId}:${operatorId}`;
     const [betAmt,betOn]= event;
     const betObj = {
@@ -86,7 +99,7 @@ export const handleBet = async(io,socket,event)=>{
         token,
         socket_id: parsedPlayerDetails.socketId,
         game_id,
-        win_amt,
+        // win_amt,
         // matchId,
       };
     if (Number(betAmt) > Number(balance)) {

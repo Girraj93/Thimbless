@@ -64,7 +64,7 @@ export const prepareDataForWebhook = async (betObj, key, socket) => {
       userIP = socket.handshake.headers["x-forwarded-for"].split(",")[0].trim();
     }
     let obj = {
-      amount:100,
+      amount: Number(betAmount).toFixed(2),
       txn_id: generateUUIDv7(),
       ip: userIP,
       game_id,
