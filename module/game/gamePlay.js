@@ -16,35 +16,29 @@ import { insertBets } from "../bet/bet-db.js";
     const randomNumber = randomNumberGenerator(event[2]);
     await settleBet(socket, randomNumber,event);
   }
-
   const randomNumberGenerator = (balls) => {
-    if(balls === 1){
-      return Math.floor(Math.random() * 3)+1;
-    }
-    else{
-    const randomNumbers = [];
-    while(randomNumbers.length < balls){
-    const randomNumber = Math.floor(Math.random() * 3)+1; 
-      if (!randomNumbers.includes(randomNumber)) {
-        randomNumbers.push(randomNumber);
+    const results = [];
+    const range = [1, 2, 3];
+    while (results.length < balls && results.length < range.length) {
+      const randomValue = range[Math.floor(Math.random() * range.length)];
+      if (!results.includes(randomValue)) {
+        results.push(randomValue);
       }
     }
-    console.log(randomNumbers,"randomNumbers");
-    return randomNumbers;
-  }
-  }
-
+    return results;
+  };
   const settleBet = async (socket, randomNumber,event) => {
     let winAmt = 0;
     const txn_id =generateUUIDv7();
     const user_id = socket.data?.userInfo.user_id;
     const playerDetails = JSON.parse(await getCache(`PL:${user_id}`));
     const game_id = playerDetails.game_id;
-    //.log(playerDetails);
     const [betAmt,betOn,balls]  = event;
-    if (randomNumber === Number(betOn)) {
-      winAmt = betAmt * 2;
-    } 
+    for(let value of randomNumber){
+       if(value === Number(betOn)){
+          winAmt = betAmt*1.25
+       }
+    }
     const webhookData = await prepareDataForWebhook(
         {
           user_id,
