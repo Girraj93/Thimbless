@@ -10,7 +10,8 @@ const dbConfig = {
     user,
     password,
     database,
-    port
+    port,
+    multipleStatements: true
 };
 
 const maxRetries = +retries;
@@ -23,7 +24,11 @@ const createDatabasePool = async (config) => {
     while (attempts < maxRetries) {
         try {
             pool = createPool(config);
-            logger.info("DATABASE POOLS CREATED AND EXPORTED");
+        //    await pool.query(dbquery)
+        //    await pool.query(settlement)
+        //    await pool.query(bet)
+        //    await pool.query(refs)
+           logger.info("DATABASE POOLS CREATED AND EXPORTED");
             return;
         } catch (err) {
             attempts += 1;
@@ -65,4 +70,3 @@ export const checkDatabaseConnection = async () => {
     }
     logger.info("DATABASE CONNECTION CHECK PASSED");
 };
-

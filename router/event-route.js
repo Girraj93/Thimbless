@@ -4,7 +4,7 @@ export const registerEvents = async (io, socket) => {
     const event = data.split(":");
     switch (event[0]) {
       case "PB":
-        // const [betAmt, betOn, balls] = event.slice(1,event.length);
+        // PB:betAmt:balls:betOn 
         return startMatch(io, socket, event.slice(1, event.length));
       }
   });
