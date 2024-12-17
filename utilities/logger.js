@@ -61,4 +61,3 @@ export function createLogger(moduleName, format = 'plain') {
     { stream: logFileStream } 
   ]));
 }
-
