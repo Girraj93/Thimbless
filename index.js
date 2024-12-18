@@ -25,7 +25,7 @@ const startServer = async () => {
   app.get("/", (req, res) => {
     return res
       .status(200)
-      .send({ status: true, msg: "Twist game server is up and running" });
+      .send({ status: true, msg: "Thimbles game server is up and running" });
   });
 
   server.listen(port, () => {
@@ -34,3 +34,6 @@ const startServer = async () => {
 };
 
 startServer();
+
+
+
