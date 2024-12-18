@@ -18,7 +18,7 @@ export const getUserInfo = async (socket) => {
     }
 
     const userDetails = JSON.parse(getUserData);
-    return socket.emit("infoResponse", {
+    return socket.emit("info", {
       urId: userDetails.userId,
       urNm: userDetails.name,
       operator_id: userDetails.operatorId,
