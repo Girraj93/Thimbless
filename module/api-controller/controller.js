@@ -7,7 +7,9 @@ export const userMatchHistory = async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
     const settlements = await read(
-      `SELECT unix_timestamp(created_at)*1000 as ts,bet_amount as bA, win_amount as wA FROM settlement WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`,
+      `SELECT unix_timestamp(created_at)*1000 as ts,bet_amount as bA, win_amount as wA FROM settlement 
+      WHERE user_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND created_at < CURDATE()
+      ORDER BY created_at DESC LIMIT 25`,
       [userId]
     );
     if (!settlements.length) {
@@ -24,3 +26,4 @@ export const userMatchHistory = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
