@@ -23,7 +23,7 @@ export const initSocket = (io) => {
     }
 
     socket.emit("info", {
-      msg: JSON.stringify({
+      msg: ({
         urId: userData.userId,
         urNm: userData.name,
         operator_id: userData.operatorId,
