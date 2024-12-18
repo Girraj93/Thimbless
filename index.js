@@ -19,7 +19,6 @@ const startServer = async () => {
   let server = createServer(app);
   var io = new Server(server);
   app.use(cors({ origin: '*' }));
-  // app.use(cors());
   app.use(express.json());
   app.use("/routes", router);
   initSocket(io);
