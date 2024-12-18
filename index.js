@@ -6,7 +6,7 @@ import { initSocket } from "./socket.js";
 import dotenv from "dotenv";
 dotenv.config();
 const port = process.env.PORT || 5000;
-import {cors} from "cors";
+import { cors } from "cors";
 import { createLogger } from "./utilities/logger.js";
 import { checkDatabaseConnection } from "./utilities/db-connection.js";
 import { initializeRedis } from "./utilities/redis-connection.js";
@@ -18,9 +18,19 @@ const startServer = async () => {
   await Promise.all([checkDatabaseConnection(), initializeRedis(), connect()]);
   var app = express();
   let server = createServer(app);
-  var io = new Server(server);
-  app.use(cors({ origin: '*' , 
-     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  var io = new Server(server,
+    {
+      cors: {
+        origin: 'http://localhost:3000',
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type'],
+        credentials: true
+      }
+    }
+  );
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
   app.use(express.json());
@@ -29,7 +39,7 @@ const startServer = async () => {
   app.get("/", (req, res) => {
     return res
       .status(200)
-      .send({ status: true, msg: "Thimbles game server is up and running"});
+      .send({ status: true, msg: "Thimbles game server is up and running" });
   });
   server.listen(port, () => {
     logger.info(`Server listening at PORT ${port}`);
