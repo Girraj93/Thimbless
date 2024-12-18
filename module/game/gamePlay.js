@@ -23,10 +23,7 @@ export const handleBet = async (io, socket, event,betObj) => {
   const user_id = socket.data?.userInfo.user_id;
   let playerDetails = await getCache(`PL:${user_id}`);
   if (!playerDetails)
-    return socket.emit("error", {
-      msg: "Invalid Player Details",
-    });
-
+    return socket.emit("error", "Invalid Player Details");
   const parsedPlayerDetails = JSON.parse(playerDetails);
   const { userId, operatorId, token, game_id, balance } = parsedPlayerDetails;
   const matchId = generateUUIDv7()
@@ -42,9 +39,7 @@ export const handleBet = async (io, socket, event,betObj) => {
   })
 
   if (Number(betAmt) > Number(balance)) {
-    return socket.emit("error", {
-      msg: `insufficient balance`,
-    });
+    return socket.emit("error","insufficient balance");
   }
   const webhookData = await prepareDataForWebhook(
     {
@@ -65,31 +60,26 @@ export const handleBet = async (io, socket, event,betObj) => {
     });
   } catch (err) {
     JSON.stringify({ req: bet_id, res: "bets cancelled by upstream" })
-    return socket.emit("error", {
-      msg: `Bet Cancelled by Upstream Server`,
-    });
+    return socket.emit("error","Bet Cancelled by Upstream Server")
   }
   await insertBets({
     bet_id,
     user_id,
     operator_id: operatorId,
+    matchId,
     bet_amount: betAmt,
     bet_on: betOn
   })
   parsedPlayerDetails.balance = Number(balance - Number(betAmt)).toFixed(2);
   await setCache(`PL:${socket.id}`, JSON.stringify(parsedPlayerDetails));
   socket.emit("info", {
-    msg: JSON.stringify({
       urId: userId,
       urNm: parsedPlayerDetails.name,
       operator_id: operatorId,
       bl: Number(parsedPlayerDetails.balance).toFixed(2),
       avIn: parsedPlayerDetails.image,
-    }),
   });
-  socket.emit("message", {
-    msg: `Bet Placed successfully`,
-  });
+  socket.emit("message","Bet Placed successfully")
 }
 
 const randomNumberGenerator = (balls) => {
@@ -117,6 +107,7 @@ const settleBet = async (socket, randomNumber, event, betObj) => {
     bet_id,
     user_id,
     operator_id,
+    matchId,
     betAmt,
     winAmount: userWins
   });
@@ -153,10 +144,8 @@ const settleBet = async (socket, randomNumber, event, betObj) => {
       );
     }
   }
-  socket.emit("result", {
-    msg: `${user_id}:${betAmt}:${betOn.trim()}:${randomNumber}:${userWins}`
-  })
-  await addSettleBet(settlements)
+  socket.emit("result",`${user_id}:${betAmt}:${betOn.trim()}:${randomNumber}:${userWins}`)
+    await addSettleBet(settlements)
 }
 
 const winAmount = (betOn, randomNumber, betAmt,balls) => {

@@ -11,7 +11,6 @@ function getImageValue(id) {
 
 export const getUserInfo = async (socket) => {
   try {
-    console.log("hello");
     const getUserData = await getCache(`PL:${socket.data.userInfo.userId}`);
     if (!getUserData) {
       return socket.disconnect(true);
