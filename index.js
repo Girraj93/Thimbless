@@ -6,7 +6,6 @@ import { initSocket } from "./socket.js";
 import dotenv from "dotenv";
 dotenv.config();
 const port = process.env.PORT || 5000;
-import { cors } from "cors";
 import { createLogger } from "./utilities/logger.js";
 import { checkDatabaseConnection } from "./utilities/db-connection.js";
 import { initializeRedis } from "./utilities/redis-connection.js";
