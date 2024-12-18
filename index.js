@@ -18,22 +18,18 @@ const startServer = async () => {
   var app = express();
   let server = createServer(app);
   var io = new Server(server);
-  app.use(cors());
+  app.use(cors({ origin: '*' }));
   app.use(express.json());
   app.use("/routes", router);
   initSocket(io);
   app.get("/", (req, res) => {
     return res
       .status(200)
-      .send({ status: true, msg: "Thimbles game server is up and running" });
+      .send({ status: true, msg: "Thimbles game server is up and running"});
   });
-
   server.listen(port, () => {
     logger.info(`Server listening at PORT ${port}`);
   });
 };
 
 startServer();
-
-
-
