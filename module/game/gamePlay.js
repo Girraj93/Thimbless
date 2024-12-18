@@ -21,6 +21,7 @@ let betObj = {};
 
 export const handleBet = async (io, socket, event,betObj) => {
   const user_id = socket.data?.userInfo.user_id;
+  let winAmt = 0;
   let playerDetails = await getCache(`PL:${user_id}`);
   if (!playerDetails)
     return socket.emit("error", "Invalid Player Details");
@@ -46,7 +47,8 @@ export const handleBet = async (io, socket, event,betObj) => {
       betAmount: betAmt,
       game_id,
       user_id: userId,
-      matchId
+      matchId,
+      bet_id,
     },
     "DEBIT",
     socket
@@ -151,13 +153,14 @@ const settleBet = async (socket, userResultIndex, event, betObj) => {
 }
 
 const winAmount = (userBallIndex, userResultIndex, betAmt,balls) => {
+  console.log(typeof(balls));
   let winAmt = 0;
   const normalizeduserBallIndex = userBallIndex.trim().toUpperCase();
   const normalizeduserResultIndexs = userResultIndex.map(value => value.trim().toUpperCase());
 
   for (let value of normalizeduserResultIndexs) {
     if (value === normalizeduserBallIndex) {
-      if(balls === 1){
+      if(Number(balls)=== 1){
       winAmt = betAmt * 2.88;
       }
       else{
