@@ -40,7 +40,7 @@ export const handleBet = async (io, socket, event,betObj) => {
     game_id,
     matchId
   })
-  
+
   if (Number(betAmt) > Number(balance)) {
     return socket.emit("error", {
       msg: `insufficient balance`,
@@ -111,7 +111,7 @@ const settleBet = async (socket, randomNumber, event, betObj) => {
   const [betAmt, balls, betOn] = event;
   const [initial, matchId, user_id, operator_id] = bet_id.split(":");
 
-  let userWins = winAmount(betOn, randomNumber, betAmt)
+  let userWins = winAmount(betOn, randomNumber, betAmt,balls)
 
   settlements.push({
     bet_id,
@@ -159,14 +159,19 @@ const settleBet = async (socket, randomNumber, event, betObj) => {
   await addSettleBet(settlements)
 }
 
-const winAmount = (betOn, randomNumber, betAmt) => {
+const winAmount = (betOn, randomNumber, betAmt,balls) => {
   let winAmt = 0;
   const normalizedBetOn = betOn.trim().toUpperCase();
   const normalizedRandomNumbers = randomNumber.map(value => value.trim().toUpperCase());
 
   for (let value of normalizedRandomNumbers) {
     if (value === normalizedBetOn) {
-      winAmt = betAmt * 1.25;
+      if(balls === 1){
+      winAmt = betAmt * 2.88;
+      }
+      else{
+        winAmt = betAmt * 1.44; 
+      }
       break;
     }
   }
