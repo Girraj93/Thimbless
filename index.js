@@ -25,9 +25,8 @@ const startServer = async () => {
   app.get("/", (req, res) => {
     return res
       .status(200)
-      .send({ status: true, msg: "Thimbles game server is up and running" });
+      .send({ status: true, msg: "Thimbles game server is up and running"});
   });
-
   server.listen(port, () => {
     logger.info(`Server listening at PORT ${port}`);
   });
