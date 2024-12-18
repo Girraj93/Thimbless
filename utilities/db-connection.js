@@ -24,10 +24,6 @@ const createDatabasePool = async (config) => {
     while (attempts < maxRetries) {
         try {
             pool = createPool(config);
-        //    await pool.query(dbquery)
-        //    await pool.query(settlement)
-        //    await pool.query(bet)
-        //    await pool.query(refs)
            logger.info("DATABASE POOLS CREATED AND EXPORTED");
             return;
         } catch (err) {
