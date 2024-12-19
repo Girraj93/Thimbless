@@ -159,11 +159,12 @@ const settleBet = async (socket, userResultIndex, event, betObj) => {
       );
     }
   }
+  
   const resultData = {
     userId: user_id,
     betAmount: betAmt,
     userBallIndex: userBallIndex.trim(),
-    userResultIndex: userResultIndex,
+    userResultIndex: userResultIndex.matchIndexes,
     userWins: userWins,
   };
     socket.emit("result", resultData);
