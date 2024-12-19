@@ -76,9 +76,9 @@ export const prepareDataForWebhook = async (betObj, key, socket) => {
         obj.txn_type = 0;
         break;
       case "CREDIT":
-        obj.amount = win_amt;
+        obj.amount = Number(win_amt).toFixed(2);
         obj.txn_ref_id = txnId;
-        obj.description = `${win_amt} credited for thimbles game for Round Id ${matchId}`;
+        obj.description = `${obj.amount} credited for thimbles game for Round Id ${matchId}`;
         obj.txn_type = 1;
         break;
       default:

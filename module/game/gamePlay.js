@@ -15,7 +15,9 @@ import { match } from "assert";
 export const startMatch = async (io, socket, event) => {
 let betObj = {};
   await handleBet(io, socket, event,betObj);
-  const userResultIndex = userResultIndexGenerator(event[1]);
+  const [betAmt, balls, userBallIndex] = event;
+
+  const userResultIndex = userResultIndexGenerator(balls,userBallIndex);
   await settleBet(socket, userResultIndex, event, betObj);
 }
 
@@ -84,22 +86,32 @@ export const handleBet = async (io, socket, event,betObj) => {
   socket.emit("message","Bet Placed successfully")
 }
 
-const userResultIndexGenerator = (balls) => {
+const userResultIndexGenerator = (balls,userBallIndex) => {
   const results = [];
   const range = ["L", "C", "R"];
+  const matchIndexes = [0,0,0];
   while (results.length < balls && results.length < range.length) {
     const randomValue = range[Math.floor(Math.random() * range.length)];
     if (!results.includes(randomValue)) {
       results.push(randomValue);
     }
   }
-  return results;
+  results.forEach((result, index) => {
+    if (result === userBallIndex.trim().toUpperCase()) {
+      matchIndexes[index] = 1;
+    }
+  });
+  console.log(matchIndexes,"inside random number generator");
+  return { results, matchIndexes };
 };
 
 const settleBet = async (socket, userResultIndex, event, betObj) => {
+  console.log(typeof(userResultIndex),"userResultIndex");
   const { bet_id, txn_id, game_id, token } = betObj;
   const settlements = [];
   const [betAmt, balls, userBallIndex] = event;
+  const { results, matchIndexes } = userResultIndex;
+  console.log(results,"results",matchIndexes,"matchIndexes");
   const [initial, matchId, user_id, operator_id] = bet_id.split(":");
 
   let userWins = winAmount(userBallIndex, userResultIndex, betAmt,balls)
@@ -147,25 +159,31 @@ const settleBet = async (socket, userResultIndex, event, betObj) => {
       );
     }
   }
-  socket.emit("result",`${user_id}:${betAmt}:${userBallIndex.trim()}:${userResultIndex}:${userWins}`)
+  const resultData = {
+    userId: user_id,
+    betAmount: betAmt,
+    userBallIndex: userBallIndex.trim(),
+    userResultIndex: userResultIndex,
+    userWins: userWins,
+  };
+    socket.emit("result", resultData);
+  // socket.emit("result",`${user_id}:${betAmt}:${userBallIndex.trim()}:${userResultIndex}:${userWins}`)
   userDashboardHistory(betAmt,socket,userWins,userResultIndex)
     await addSettleBet(settlements)
 }
-
-const winAmount = (userBallIndex, userResultIndex, betAmt,balls) => {
-  console.log(typeof(balls));
+const winAmount = (userBallIndex, userResultIndex, betAmt, balls) => {
   let winAmt = 0;
   const normalizeduserBallIndex = userBallIndex.trim().toUpperCase();
-  const normalizeduserResultIndexs = userResultIndex.map(value => value.trim().toUpperCase());
+  // Ensure userResultIndex values are strings
+  const normalizeduserResultIndexs = Object.values(userResultIndex)
+    .filter((value) => typeof value === "string") // Keep only string values
+    .map((value) => value.trim().toUpperCase());  // Normalize
+
+    console.log(userResultIndex,"normalizeduserResultIndexs");
 
   for (let value of normalizeduserResultIndexs) {
     if (value === normalizeduserBallIndex) {
-      if(Number(balls)=== 1){
-      winAmt = betAmt * 2.88;
-      }
-      else{
-        winAmt = betAmt * 1.44; 
-      }
+      winAmt = Number(balls) === 1 ? betAmt * 2.88 : betAmt * 1.44;
       break;
     }
   }
@@ -173,11 +191,17 @@ const winAmount = (userBallIndex, userResultIndex, betAmt,balls) => {
 };
 
 export const reconnect = async (socket) => {
-
   socket.emit("rjn_status", ({
     }),
 )}
 
 export const userDashboardHistory = async(betAmt,socket,userWins,userResultIndex) =>{
-  socket.emit("history",`${userResultIndex}:${betAmt}:${userWins}`)
+  const matchIndexes = Object.values(userResultIndex);
+  const resultArray = matchIndexes[1]
+  const historyData = {
+    resultArray,
+    betAmt,
+    userWins
+  }
+  socket.emit("history",historyData)
 }
