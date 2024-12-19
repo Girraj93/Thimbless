@@ -76,13 +76,13 @@ export const handleBet = async (io, socket, event,betObj) => {
   })
   parsedPlayerDetails.balance = Number(balance - Number(betAmt)).toFixed(2);
   await setCache(`PL:${socket.id}`, JSON.stringify(parsedPlayerDetails));
-  socket.emit("info", {
-      urId: userId,
-      urNm: parsedPlayerDetails.name,
-      operator_id: operatorId,
-      bl: Number(parsedPlayerDetails.balance).toFixed(2),
-      avIn: parsedPlayerDetails.image,
-  });
+  // socket.emit("info", {
+  //     urId: userId,
+  //     urNm: parsedPlayerDetails.name,
+  //     operator_id: operatorId,
+  //     bl: Number(parsedPlayerDetails.balance).toFixed(2),
+  //     avIn: parsedPlayerDetails.image,
+  // });
   socket.emit("message","Bet Placed successfully")
 }
 
@@ -101,17 +101,14 @@ const userResultIndexGenerator = (balls,userBallIndex) => {
       matchIndexes[index] = 1;
     }
   });
-  console.log(matchIndexes,"inside random number generator");
   return { results, matchIndexes };
 };
 
 const settleBet = async (socket, userResultIndex, event, betObj) => {
-  console.log(typeof(userResultIndex),"userResultIndex");
   const { bet_id, txn_id, game_id, token } = betObj;
   const settlements = [];
   const [betAmt, balls, userBallIndex] = event;
   const { results, matchIndexes } = userResultIndex;
-  console.log(results,"results",matchIndexes,"matchIndexes");
   const [initial, matchId, user_id, operator_id] = bet_id.split(":");
 
   let userWins = winAmount(userBallIndex, userResultIndex, betAmt,balls)
@@ -162,7 +159,7 @@ const settleBet = async (socket, userResultIndex, event, betObj) => {
   
   const resultData = {
     userId: user_id,
-    betAmount: betAmt,
+    betAmount: Number(betAmt),
     userBallIndex: userBallIndex.trim(),
     userResultIndex: userResultIndex.matchIndexes,
     userWins: userWins,
@@ -179,8 +176,6 @@ const winAmount = (userBallIndex, userResultIndex, betAmt, balls) => {
   const normalizeduserResultIndexs = Object.values(userResultIndex)
     .filter((value) => typeof value === "string") // Keep only string values
     .map((value) => value.trim().toUpperCase());  // Normalize
-
-    console.log(userResultIndex,"normalizeduserResultIndexs");
 
   for (let value of normalizeduserResultIndexs) {
     if (value === normalizeduserBallIndex) {
