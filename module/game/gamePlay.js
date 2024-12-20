@@ -184,15 +184,39 @@ const winAmount = (betAmt, balls) => {
     return Number(balls) === 1 ? Number(betAmt) * 2.88 : Number(betAmt) * 1.44;
 };
 //send userDashboard history
-export const userDashboardHistory = async(betAmt,socket,userWins,ballIndex,matchIndexes) =>{
-  const historyData = {
-    betAmt:betAmt,
-    userWins:userWins,
-    ballIndex:ballIndex,
-    matchIndexes:matchIndexes
+export const userDashboardHistory = async (betAmt, socket, userWins, ballIndex, matchIndexes) => {
+  const userId = socket.data?.userInfo?.user_id;
+  if (!userId) {
+    console.error("User ID not found in socket data");
+    return socket.emit("error", "User not authenticated");
   }
-  socket.emit("history",historyData)
-}
+  try {
+    // Fetch the latest 8 history entries for the user
+    const historyEntries = await read(
+      `SELECT bet_amount, win_amount, matchIndexes 
+       FROM settlement 
+       WHERE user_id = ? 
+       ORDER BY created_at DESC 
+       LIMIT 8`,
+      [userId]
+    );
+
+    const newEntry = {
+      betAmt,
+      userWins,
+      matchIndexes,
+    };
+
+    // Include the new entry and emit the result
+    const responseHistory = [newEntry, ...historyEntries];
+    socket.emit("history", responseHistory);
+  } catch (error) {
+    console.error("Error fetching user history:", error);
+    socket.emit("error", "Failed to fetch user history");
+  }
+};
+
+
 export const reconnect = async (socket) => {
   socket.emit("rjn_status", ({
     }),
