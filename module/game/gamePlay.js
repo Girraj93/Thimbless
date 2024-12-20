@@ -45,7 +45,7 @@ let betObj = {};
         betAmt: Number(betAmt),
         ballIndex: ballIndex.trim(),
         matchIndexes: matchIndexes,
-        userWins: userWins,
+        userWins: userWins.toFixed(2),
         balance: parsedPlayerDetails.balance,
       };
       socket.emit("result", resultData);
@@ -171,7 +171,7 @@ const settleBet = async (socket, matchIndexes, event, betObj) => {
         betAmt: Number(betAmt),
         ballIndex: ballIndex.trim(),
         matchIndexes: matchIndexes,
-        userWins: userWins,
+        userWins: userWins.toFixed(2),
         balance: parsedPlayerDetails.balance
       };
         socket.emit("result", resultData);
