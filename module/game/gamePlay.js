@@ -11,6 +11,7 @@ import {
 import { sendToQueue } from "../../utilities/amqp.js";
 import { addSettleBet, insertBets } from "../bet/bet-db.js";
 import { match } from "assert";
+import { read } from "../../utilities/db-connection.js";
 
 export const startMatch = async (io, socket, event) => {
 let betObj = {};
@@ -193,30 +194,20 @@ export const userDashboardHistory = async (betAmt, socket, userWins, ballIndex, 
   try {
     // Fetch the latest 8 history entries for the user
     const historyEntries = await read(
-      `SELECT bet_amount, win_amount, matchIndexes 
+      `SELECT bet_amount, win_amount, result_index 
        FROM settlement 
        WHERE user_id = ? 
        ORDER BY created_at DESC 
        LIMIT 8`,
       [userId]
     );
-
-    const newEntry = {
-      betAmt,
-      userWins,
-      matchIndexes,
-    };
-
-    // Include the new entry and emit the result
-    const responseHistory = [newEntry, ...historyEntries];
+    const responseHistory = [...historyEntries];
     socket.emit("history", responseHistory);
   } catch (error) {
     console.error("Error fetching user history:", error);
     socket.emit("error", "Failed to fetch user history");
   }
 };
-
-
 export const reconnect = async (socket) => {
   socket.emit("rjn_status", ({
     }),
