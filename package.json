@@ -9,7 +9,7 @@
     "start": "nodemon index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "girraj",
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.10.4",

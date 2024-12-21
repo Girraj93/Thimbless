@@ -5,6 +5,7 @@ import {
   getCache,
   setCache,
 } from "./utilities/redis-connection.js";
+import { createLogger } from "./utilities/logger.js";
 
 export const initSocket = (io) => {
   const onConnection = async (socket) => {
