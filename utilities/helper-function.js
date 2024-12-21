@@ -1,6 +1,5 @@
 import { parse } from "dotenv";
 import { createLogger } from "./logger.js";
-
 const failedBetLogger = createLogger("failedBets", "jsonl");
 const failedPartialCashoutLogger = createLogger(
   "failedPartialCashout",

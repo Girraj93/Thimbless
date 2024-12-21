@@ -32,7 +32,6 @@ const prettyStream = {
 // Create a JSONL stream
 const jsonlStream = (filePath) => fs.createWriteStream(filePath, { flags: 'a' });
 
-
 export function createLogger(moduleName, format = 'plain') {
   const logDir = 'logs';
   const jsonlFilePath = path.join(logDir, `${moduleName}.jsonl`);
