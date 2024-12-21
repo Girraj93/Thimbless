@@ -14,16 +14,16 @@ import { match } from "assert";
 import { read } from "../../utilities/db-connection.js";
 
 export const startMatch = async (io, socket, event) => {
-let betObj = {};
-  await handleBet(io, socket, event,betObj);
-  const [betAmt, balls,ballIndex] = event;
+  let betObj = {};
+  await handleBet(io, socket, event, betObj);
+  const [betAmt, balls, ballIndex] = event;
   const matchIndexes = randomIndexGenerator(balls); //random generate indexes
-  
+
   if (matchIndexes[Number(ballIndex)] === 1) {
     await settleBet(socket, matchIndexes, event, betObj);
   } else {
     const { bet_id, matchId } = betObj;
-    const [, , user_id,operator_id] = bet_id.split(":")
+    const [, , user_id, operator_id] = bet_id.split(":")
     const userWins = 0;
     const settlements = [
       {
@@ -37,7 +37,7 @@ let betObj = {};
         userWins,
       },
     ];
-   addSettleBet(settlements)
+    addSettleBet(settlements)
     const cachedPlayerDetails = await getCache(`PL:${user_id}`);
     if (cachedPlayerDetails) {
       const parsedPlayerDetails = JSON.parse(cachedPlayerDetails);
@@ -50,12 +50,12 @@ let betObj = {};
         balance: parsedPlayerDetails.balance,
       };
       socket.emit("result", resultData);
-      userDashboardHistory(Number(betAmt),socket,userWins,matchIndexes)
+      userDashboardHistory(socket)
     }
   }
 }
 //handle bets and Debit transation
-export const handleBet = async (io, socket, event,betObj) => {
+export const handleBet = async (io, socket, event, betObj) => {
   const user_id = socket.data?.userInfo.user_id;
   let playerDetails = await getCache(`PL:${user_id}`);
   if (!playerDetails)
@@ -65,7 +65,7 @@ export const handleBet = async (io, socket, event,betObj) => {
   const matchId = generateUUIDv7()
   const bet_id = `BT:${matchId}:${userId}:${operatorId}`;
   const [betAmt, balls, ballIndex] = event;
-   Object.assign(betObj,{
+  Object.assign(betObj, {
     betAmt,
     bet_id,
     token,
@@ -75,7 +75,7 @@ export const handleBet = async (io, socket, event,betObj) => {
   })
 
   if (Number(betAmt) > Number(balance)) {
-    return socket.emit("error","insufficient balance");
+    return socket.emit("error", "insufficient balance");
   }
   const webhookData = await prepareDataForWebhook(
     {
@@ -97,7 +97,7 @@ export const handleBet = async (io, socket, event,betObj) => {
     });
   } catch (err) {
     JSON.stringify({ req: bet_id, res: "bets cancelled by upstream" })
-    return socket.emit("error","Bet Cancelled by Upstream Server")
+    return socket.emit("error", "Bet Cancelled by Upstream Server")
   }
   await insertBets({
     bet_id,
@@ -109,7 +109,7 @@ export const handleBet = async (io, socket, event,betObj) => {
   })
   parsedPlayerDetails.balance = Number(balance - Number(betAmt)).toFixed(2);
   await setCache(`PL:${socket.id}`, JSON.stringify(parsedPlayerDetails));
-  socket.emit("message","Bet Placed successfully")
+  socket.emit("message", "Bet Placed successfully")
 }
 const randomIndexGenerator = (balls) => {
   const shuffleArray = (array) => {
@@ -121,14 +121,14 @@ const randomIndexGenerator = (balls) => {
   };
   const singleBallIndexes = shuffleArray([1, 0, 0]);//single ball case
   const doubleBallIndexes = shuffleArray([1, 1, 0]); //double ball case
-return Number(balls) === 1 ?singleBallIndexes: doubleBallIndexes;
+  return Number(balls) === 1 ? singleBallIndexes : doubleBallIndexes;
 };
 //credit transation
 const settleBet = async (socket, matchIndexes, event, betObj) => {
   const { bet_id, txn_id, game_id, token } = betObj;
-  const [betAmt, balls,ballIndex] = event;
+  const [betAmt, balls, ballIndex] = event;
   const [initial, matchId, user_id, operator_id] = bet_id.split(":");
-  let userWins = winAmount(betAmt,balls)
+  let userWins = Number(balls) === 1 ? Number(betAmt) * 2.88 : Number(betAmt) * 1.44;
   const settlements = [
     {
       bet_id,
@@ -141,74 +141,64 @@ const settleBet = async (socket, matchIndexes, event, betObj) => {
       userWins,
     },
   ];
-    const webhookData = await prepareDataForWebhook(
-      {
-        user_id,
-        win_amt: userWins,
-        game_id,
-        txnId: txn_id,
-        matchId
-      },
-      "CREDIT",
-      socket
+  const webhookData = await prepareDataForWebhook(
+    {
+      user_id,
+      win_amt: userWins,
+      game_id,
+      txnId: txn_id,
+      matchId
+    },
+    "CREDIT",
+    socket
+  );
+  await sendToQueue(
+    "",
+    "games_cashout",
+    JSON.stringify({ ...webhookData, operatorId: operator_id, token: token })
+  );
+  const cachedPlayerDetails = await getCache(`PL:${user_id}`);
+  if (cachedPlayerDetails) {
+    const parsedPlayerDetails = JSON.parse(cachedPlayerDetails);
+    parsedPlayerDetails.balance = Number(
+      Number(parsedPlayerDetails.balance) + Number(userWins)
+    ).toFixed(2);
+    await setCache(
+      `PL:${user_id}`,
+      JSON.stringify(parsedPlayerDetails)
     );
-    await sendToQueue(
-      "",
-      "games_cashout",
-      JSON.stringify({ ...webhookData, operatorId: operator_id, token: token })
-    );
-    const cachedPlayerDetails = await getCache(`PL:${user_id}`);
-    if (cachedPlayerDetails) {
-      const parsedPlayerDetails = JSON.parse(cachedPlayerDetails);
-      parsedPlayerDetails.balance = Number(
-        Number(parsedPlayerDetails.balance) + Number(userWins)
-      ).toFixed(2);
-      await setCache(
-        `PL:${user_id}`,
-        JSON.stringify(parsedPlayerDetails)
-      );
-      const resultData = {
-        userId: user_id,
-        betAmt: Number(betAmt),
-        ballIndex: ballIndex.trim(),
-        matchIndexes: matchIndexes,
-        userWins: userWins.toFixed(2),
-        balance: parsedPlayerDetails.balance
-      };
-        socket.emit("result", resultData);
-    }
-  userDashboardHistory(Number(betAmt),socket,userWins,matchIndexes)
-    await addSettleBet(settlements)
+    const resultData = {
+      userId: user_id,
+      betAmt: Number(betAmt),
+      ballIndex: ballIndex.trim(),
+      matchIndexes: matchIndexes,
+      userWins: userWins.toFixed(2),
+      balance: parsedPlayerDetails.balance
+    };
+    socket.emit("result", resultData);
+  }
+  await addSettleBet(settlements)
+  userDashboardHistory(socket)
 }
-//check winning Amount
-const winAmount = (betAmt, balls) => {
-    return Number(balls) === 1 ? Number(betAmt) * 2.88 : Number(betAmt) * 1.44;
-};
 //send userDashboard history
-export const userDashboardHistory = async (betAmt, socket, userWins, ballIndex, matchIndexes) => {
+export const userDashboardHistory = async (socket) => {
   const userId = socket.data?.userInfo?.user_id;
   if (!userId) {
     console.error("User ID not found in socket data");
     return socket.emit("error", "User not authenticated");
   }
   try {
-    // Fetch the latest 8 history entries for the user
     const historyEntries = await read(
-      `SELECT bet_amount, win_amount, result_index 
+      `SELECT result_index, bet_amount, win_amount 
        FROM settlement 
        WHERE user_id = ? 
        ORDER BY created_at DESC 
        LIMIT 8`,
       [userId]
     );
-    const responseHistory = [...historyEntries];
-    socket.emit("history", responseHistory);
+    socket.emit("history", historyEntries);
   } catch (error) {
     console.error("Error fetching user history:", error);
     socket.emit("error", "Failed to fetch user history");
   }
 };
-export const reconnect = async (socket) => {
-  socket.emit("rjn_status", ({
-    }),
-)}
