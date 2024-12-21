@@ -8,7 +8,7 @@ export const userMatchHistory = async (req, res) => {
     }
     const settlements = await read(
       `SELECT unix_timestamp(created_at)*1000 as ts,bet_amount as bA, win_amount as wA FROM settlement 
-      WHERE user_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND created_at < CURDATE()
+      WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
       ORDER BY created_at DESC LIMIT 25`,
       [userId]
     );
@@ -27,3 +27,5 @@ export const userMatchHistory = async (req, res) => {
   }
 };
 
+    //      AND created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+   //      WHERE user_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND created_at < CURDATE()
