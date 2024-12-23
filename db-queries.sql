@@ -28,7 +28,23 @@ CREATE TABLE IF NOT EXISTS `bets` (
    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
  ); 
 
- ALTER TABLE `thimbles`.`bets` ADD INDEX `inx_bet_id` (`bet_id` ASC) INVISIBLE, ADD INDEX `inx_user_id` (`user_id` ASC) INVISIBLE, ADD INDEX `inx_operator_id` (`operator_id` ASC) VISIBLE,ADD INDEX  `inx_match_id` (`match_id` ASC) INVISIBLE, ADD INDEX `inx_bet_amount` (`bet_amount` ASC) INVISIBLE, ADD INDEX `inx_ball_index` (`ball_index` ASC) INVISIBLE,ADD INDEX `inx_created_at` (`created_at` ASC) VISIBLE;
+ ALTER TABLE `thimbles`.`bets` 
+ ADD INDEX `inx_bet_id` (`bet_id` ASC) INVISIBLE, 
+ ADD INDEX `inx_user_id` (`user_id` ASC) INVISIBLE,
+ ADD INDEX `inx_operator_id` (`operator_id` ASC) VISIBLE,
+ ADD INDEX  `inx_match_id` (`match_id` ASC) INVISIBLE, 
+ ADD INDEX `inx_bet_amount` (`bet_amount` ASC) INVISIBLE, 
+ ADD INDEX `inx_ball_index` (`ball_index` ASC) INVISIBLE,
+ ADD INDEX `inx_created_at` (`created_at` ASC) VISIBLE;
 
- ALTER TABLE `thimbles`.`settlement` ADD INDEX `inx_bet_id` (`bet_id` ASC) VISIBLE, ADD INDEX `inx_user_id` (`user_id` ASC) INVISIBLE, ADD INDEX `inx_operator_id` (`operator_id` ASC) VISIBLE,ADD INDEX  `inx_match_id` (`match_id` ASC) INVISIBLE,ADD INDEX `inx_ball_index` (`ball_index` ASC) INVISIBLE, ADD INDEX `inx_result_index` (`result_index` ASC) INVISIBLE,ADD INDEX `inx_bet_amount` (`bet_amount` ASC) INVISIBLE,ADD INDEX `inx_win_amount` (`win_amount` ASC) INVISIBLE, ADD INDEX `inx_created_at` (`created_at` ASC) VISIBLE;
+ ALTER TABLE `thimbles`.`settlement` 
+ ADD INDEX `inx_bet_id` (`bet_id` ASC) VISIBLE,
+ ADD INDEX `inx_user_id` (`user_id` ASC) INVISIBLE,
+ ADD INDEX `inx_operator_id` (`operator_id` ASC) VISIBLE,
+ ADD INDEX  `inx_match_id` (`match_id` ASC) INVISIBLE,
+ ADD INDEX `inx_ball_index` (`ball_index` ASC) INVISIBLE,
+ ADD INDEX `inx_result_index` (`result_index` ASC) INVISIBLE,
+ ADD INDEX `inx_bet_amount` (`bet_amount` ASC) INVISIBLE,
+ ADD INDEX `inx_win_amount` (`win_amount` ASC) INVISIBLE,
+ ADD INDEX `inx_created_at` (`created_at` ASC) VISIBLE;
  
