@@ -5,9 +5,9 @@ import {
   getCache,
   setCache,
 } from "./utilities/redis-connection.js";
+import crypto from "crypto";
 import { createLogger } from "./utilities/logger.js";
 import { read } from "./utilities/db-connection.js";
-
 
 export const initSocket = (io) => {
   const onConnection = async (socket) => {
@@ -24,6 +24,12 @@ export const initSocket = (io) => {
       console.log("Invalid token", token);
       return socket.disconnect(true);
     }
+    const generateHash = (data) => {
+      const hash = crypto.createHash("sha256");
+      hash.update(JSON.stringify(data));
+      return hash.digest("hex");
+    };
+   const hash =  generateHash(socket.data?.userInfo?.user_id)
     socket.emit("info", {
       urId: userData.userId,
       urNm: userData.name,
@@ -31,7 +37,9 @@ export const initSocket = (io) => {
       bl: Number(userData.balance).toFixed(2),
       avIn: userData.image,
       crTs: Date.now(),
+      hash:hash
     });
+
     //send userDashboard history with event--------------------------------
  const userDashboardHistory = async (socket) => {
       const userId = socket.data?.userInfo?.user_id;
