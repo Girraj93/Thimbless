@@ -32,7 +32,6 @@ export const initSocket = (io) => {
       avIn: userData.image,
       crTs: Date.now(),
     });
-
     //send userDashboard history with event--------------------------------
  const userDashboardHistory = async (socket) => {
       const userId = socket.data?.userInfo?.user_id;
@@ -55,8 +54,8 @@ export const initSocket = (io) => {
         socket.emit("error", "Failed to fetch user history");
       }
     };
-    
-    
+    userDashboardHistory(socket);
+
     await setCache(
       `PL:${userData.userId}`,
       JSON.stringify({ ...userData, socketId: socket.id }),
