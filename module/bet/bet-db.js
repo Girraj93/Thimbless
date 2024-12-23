@@ -33,8 +33,7 @@ export const insertBets = async (betData) => {
   try {
     const SQL_INSERT_BETS =
       "INSERT INTO bets (bet_id, user_id, operator_id,match_id,bet_amount,ball_index) VALUES(?,?,?,?,?,?)";
-    const { bet_id, user_id, operator_id, betAmt, ballIndex } = betData;
-    const [initial, matchId] = bet_id.split(":");
+    const { bet_id, user_id, operator_id, betAmt, matchId,ballIndex } = betData;
     await write(SQL_INSERT_BETS, [
       bet_id,
       decodeURIComponent(user_id),

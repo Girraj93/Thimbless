@@ -195,7 +195,7 @@ export const userDashboardHistory = async (socket) => {
   }
   try {
     const historyEntries = await read(
-      `SELECT result_index, bet_amount, win_amount 
+      `SELECT result_index, bet_amount, win_amount ,ball_index AS openIndex
        FROM settlement 
        WHERE user_id = ? 
        ORDER BY created_at DESC 
